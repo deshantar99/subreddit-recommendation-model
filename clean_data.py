@@ -19,8 +19,8 @@ def convert_all_to_csv():
 
 def train_test_split():
 
-    open('split_data/test.csv').close()
-    open('split_data/train.csv').close()
+    open('split_data/test.csv', 'w').close()
+    open('split_data/train.csv' , 'w').close()
 
     for subreddit in subreddits:
         with open('split_data/test.csv', 'a') as test_file, open('split_data/train.csv', 'a') as train_file:
@@ -29,10 +29,10 @@ def train_test_split():
             Train_X, Test_X, Train_Y, Test_Y = model_selection.train_test_split(Corpus['title'],Corpus['subreddit'],test_size=0.3)
 
             for i, title in Test_X.items():
-                test_file.write(str(title) + ',' + str(Test_Y[i]) + '\n')
+                test_file.write(str(title[1:-1]) + ',' + str(Test_Y[i].strip()[1:-1]) + '\n')
 
             for i, title in Train_X.items():
-                train_file.write(str(title) + ',' + str(Train_Y[i]) + '\n')
+                train_file.write(str(title[1:-1]) + ',' + str(Train_Y[i][1:-1]) + '\n')
 
 
 

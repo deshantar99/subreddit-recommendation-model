@@ -183,6 +183,8 @@ class Dataset:
 				if line != '\n':
 					split = line.strip().split(',')
 					split[1] = split[1].replace('\'', '')
+					# split[0] = split[0][1:-1]
+					# print(split[0])
 					# split[0] = re.sub(r'\r\n', " ", split[0])
 					# split[0] = re.sub(r"[^a-zA-Z]+", " ", split[0])
 					# split[0] = re.sub(r'[" "]+', " ", split[0])
