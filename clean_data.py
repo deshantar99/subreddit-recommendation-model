@@ -18,9 +18,19 @@ def convert_all_to_csv():
 
 
 def train_test_split():
+    np.random.seed(500)
+
 
     open('split_data/test.csv', 'w').close()
     open('split_data/train.csv' , 'w').close()
+
+    testFile = open('split_data/test.csv', 'w')
+    testFile.write('title,subreddit\n')
+    testFile.close()
+    trainFile = open('split_data/train.csv' , 'w')
+    trainFile.write('title,subreddit\n')
+    trainFile.close()
+
 
     for subreddit in subreddits:
         with open('split_data/test.csv', 'a') as test_file, open('split_data/train.csv', 'a') as train_file:
@@ -29,10 +39,12 @@ def train_test_split():
             Train_X, Test_X, Train_Y, Test_Y = model_selection.train_test_split(Corpus['title'],Corpus['subreddit'],test_size=0.3)
 
             for i, title in Test_X.items():
-                test_file.write(str(title[1:-1]) + ',' + str(Test_Y[i].strip()[1:-1]) + '\n')
+                # test_file.write(str(title[1:-1]) + ',' + str(Test_Y[i].strip()[1:-1]) + '\n')
+                test_file.write(str(title.strip()) + ',' + str(Test_Y[i].strip()) + '\n')
 
             for i, title in Train_X.items():
-                train_file.write(str(title[1:-1]) + ',' + str(Train_Y[i][1:-1]) + '\n')
+                # train_file.write(str(title[1:-1]) + ',' + str(Train_Y[i].strip()[1:-1]) + '\n')
+                train_file.write(str(title.strip()) + ',' + str(Train_Y[i].strip()) + '\n')
 
 
 

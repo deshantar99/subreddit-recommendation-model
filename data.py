@@ -110,7 +110,7 @@ class Labels(IntEnum):
 	wallstreetbets = 103
 	oculus = 104
 	socialskills = 105
-	gmaing = 106
+	gaming = 106
 	relationship_advice = 107
 	movies = 108
 	space = 109
