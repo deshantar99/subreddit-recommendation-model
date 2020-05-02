@@ -23,8 +23,8 @@ python trained_model.py
 Output of the app:
 
 Do you want to train again (y/n): (TAKES A LONG TIME)
-- Enter 'n'
-- You can hit no because the trained models are saved in the /local/ directory. If there are some issues with running the app, you may need to verify that the directory exists, finally train the model by entering 'y'.
+- Enter 'y' if you don't have the /local/ directory with the trained model local files
+- You can hit no if the trained models are saved in the /local/ directory. If there are some issues with running the app, you may need to verify that the directory exists, finally train the model by entering 'y'.
 
 Enter you query('exit' to end):
 
@@ -37,5 +37,4 @@ KNN:
 ROcchio:
 
 -These will display the prediction from each of the classification models. SVM is the most accurate while NB is the most efficient. SVM takes a long time to train, as seen by the size of the local model, which is over 200 MB.
-
 
