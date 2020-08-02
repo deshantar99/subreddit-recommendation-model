@@ -58,9 +58,7 @@ def lemmatize_string(wordStr, fileptr, has_file_flag):
             return finalStr
 
 
-def train_model(model_type):
-    #trains the model on the train data; model defined by model_type
-    #model_type: nb, svm, knn, rocchio
+def createUtils():
 
     #tokenize train and test titles
     train_file['title'] = tokenize_string(train_file['title'])
@@ -90,6 +88,20 @@ def train_model(model_type):
         pickle.dump(Tfidf_vect, utils_file)
         pickle.dump(Train_X_Tfidf, utils_file)
         pickle.dump(Test_X_Tfidf, utils_file)
+        pickle.dump(Train_Y, utils_file)
+        pickle.dump(Test_Y, utils_file)
+
+
+
+def train_model(model_type):
+    #trains the model on the train data; model defined by model_type
+    #model_type: nb, svm, knn, rocchio
+    with open('local/utils.txt', 'rb') as utils_file:
+        Tfidf_vect = pickle.load(utils_file)
+        Train_X_Tfidf = pickle.load(utils_file)
+        Test_X_Tfidf = pickle.load(utils_file)
+        Train_Y = pickle.load(utils_file)
+        Test_Y = pickle.load(utils_file)
 
     if(model_type == 'nb'):
         NB = naive_bayes.MultinomialNB()
@@ -98,25 +110,28 @@ def train_model(model_type):
         print('Naive Bayes Train Accuracy: ', metrics.accuracy_score(train_NB, Train_Y) * 100)
         test_NB = NB.predict(Test_X_Tfidf)
         print('Naive Bayes Test Accuracy: ', metrics.accuracy_score(test_NB, Test_Y) * 100)
+        println('Naive Bayes Train precision: ', metrics.precision_score())
 
         with open('local/trained_nb.txt', 'wb') as NB_file:
             pickle.dump(NB, NB_file)
 
     elif(model_type == 'svm'):
+        print("Training SVM")
         SVM = svm.SVC(C=1.0, kernel='linear', degree=3, gamma='auto')
         SVM.fit(Train_X_Tfidf, Train_Y)
-
+        print("SVM Fitted")
+        with open('local/trained_svm.txt', 'wb') as SVM_file:
+            pickle.dump(SVM, SVM_file)
         train_svm = SVM.predict(Train_X_Tfidf)
         print('SVM Train Accuracy: ' + str(metrics.accuracy_score(train_svm, Train_Y) * 100))
         test_SVM = SVM.predict(Test_X_Tfidf)
         print("SVM Test score: " + str(metrics.accuracy_score(test_SVM, Test_Y) * 100))
 
-        with open('trained_svm.txt', 'wb') as SVM_file:
-            pickle.dump(SVM, SVM_file)
-
     elif(model_type == 'knn'):
+        print("Training KNN")
         KNN = KNeighborsClassifier(n_neighbors = 3)
         KNN.fit(Train_X_Tfidf, Train_Y)
+        print("KNN Fitted")
         train_KNN = KNN.predict(Train_X_Tfidf)
         print('KNN Train Accuracy: ' + str(metrics.accuracy_score(train_KNN, Train_Y) * 100))
         test_KNN = KNN.predict(Test_X_Tfidf)
@@ -126,9 +141,10 @@ def train_model(model_type):
             pickle.dump(KNN, KNN_file)
 
     elif(model_type == 'rocchio'):
+        print("Training Rocchio")
         Rocchio = NearestCentroid()
         Rocchio.fit(Train_X_Tfidf, Train_Y)
-        print('fitted')
+        print('Rocchio Fitted')
         train_Rocchio = Rocchio.predict(Train_X_Tfidf)
         print('Rocchio Train Accuracy: ' + str(metrics.accuracy_score(train_Rocchio, Train_Y) * 100))
         test_Rocchio = Rocchio.predict(Test_X_Tfidf)
@@ -137,56 +153,62 @@ def train_model(model_type):
         with open('local/trained_rocchio.txt', 'wb') as Rocchio_file:
             pickle.dump(Rocchio, Rocchio_file)
 
-
-train_choice = input('Do you want to train again? (y/n): (TAKES A LONG TIME)')
-
-#takes a very long time, train each model individually
-#train one, comment the rest
-#each time a model is trained again, it is locally saved
-#
-if(train_choice == 'y'):
-    train_model('nb')
-    train_model('svm')
-    train_model('knn')
-    train_model('rocchio')
+    else:
+        print("Wrong model entered.")
 
 
-with open('local/utils.txt', 'rb') as utils_file:
-    Tfidf_vect = pickle.load(utils_file)
-    Train_X_Tfidf = pickle.load(utils_file)
-    Test_X_Tfidf = pickle.load(utils_file)
+def main():
+    train_choice = input('Do you want to train again? (y/n): (TAKES A LONG TIME)')
 
-with open('local/trained_nb.txt', 'rb') as NB_file:
-    NB = pickle.load(NB_file)
-
-with open('local/trained_svm.txt', 'rb') as SVM_file:
-    SVM = pickle.load(SVM_file)
-
-with open('local/trained_knn.txt', 'rb') as KNN_file:
-    KNN = pickle.load(KNN_file)
-
-with open('local/trained_rocchio.txt', 'rb') as Rocchio_file:
-    Rocchio = pickle.load(Rocchio_file)
+    #takes a very long time, train each model individually
+    #train one, comment the rest
+    #each time a model is trained again, it is locally saved
+    if(train_choice == 'y'):
+        createUtils()
+        train_model('nb')
+        train_model('svm')
+        train_model('knn')
+        train_model('rocchio')
 
 
-Encoder = LabelEncoder()
-Train_Y = train_file['subreddit']
-Train_Y = Encoder.fit_transform(Train_Y)
+    with open('local/utils.txt', 'rb') as utils_file:
+        Tfidf_vect = pickle.load(utils_file)
+        Train_X_Tfidf = pickle.load(utils_file)
+        Test_X_Tfidf = pickle.load(utils_file)
 
-query = ''
-while(query != 'exit'):
-    query = input("Enter your query('exit' to end): ")
-    if(query == 'exit'): break
-    query = tokenize_string(pd.Series(query))
-    query = lemmatize_string(query, None, 0)
+    with open('local/trained_nb.txt', 'rb') as NB_file:
+        NB = pickle.load(NB_file)
 
-    query_Tfidf = Tfidf_vect.transform(query)
-    Rocchio_predict = Rocchio.predict(query_Tfidf)
-    KNN_predict = KNN.predict(query_Tfidf)
-    SVM_predict = SVM.predict(query_Tfidf)
-    NB_predict = NB.predict(query_Tfidf)
+    with open('local/trained_svm.txt', 'rb') as SVM_file:
+        SVM = pickle.load(SVM_file)
 
-    print('NB: ' + str(Encoder.inverse_transform(NB_predict)))
-    print('SVM: ' + str(Encoder.inverse_transform(SVM_predict)))
-    print('KNN: ' + str(Encoder.inverse_transform(KNN_predict)))
-    print('Rocchio: ' + str(Encoder.inverse_transform(Rocchio_predict)))
+    with open('local/trained_knn.txt', 'rb') as KNN_file:
+        KNN = pickle.load(KNN_file)
+
+    with open('local/trained_rocchio.txt', 'rb') as Rocchio_file:
+        Rocchio = pickle.load(Rocchio_file)
+
+
+    Encoder = LabelEncoder()
+    Train_Y = train_file['subreddit']
+    Train_Y = Encoder.fit_transform(Train_Y)
+
+    query = ''
+    while(query != 'exit'):
+        query = input("Enter your query('exit' to end): ")
+        if(query == 'exit'): break
+        query = tokenize_string(pd.Series(query))
+        query = lemmatize_string(query, None, 0)
+
+        query_Tfidf = Tfidf_vect.transform(query)
+        Rocchio_predict = Rocchio.predict(query_Tfidf)
+        KNN_predict = KNN.predict(query_Tfidf)
+        SVM_predict = SVM.predict(query_Tfidf)
+        NB_predict = NB.predict(query_Tfidf)
+
+        print('NB: ' + str(Encoder.inverse_transform(NB_predict)))
+        print('SVM: ' + str(Encoder.inverse_transform(SVM_predict)))
+        print('KNN: ' + str(Encoder.inverse_transform(KNN_predict)))
+        print('Rocchio: ' + str(Encoder.inverse_transform(Rocchio_predict)))
+
+main()
